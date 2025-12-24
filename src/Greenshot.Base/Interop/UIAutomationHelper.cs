@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Greenshot - a free and open source screenshot tool
  * Copyright (C) 2007-2021 Thomas Braun, Jens Klingen, Robin Krom
  *
@@ -21,6 +21,7 @@
 
 using System;
 using System.Windows.Automation;
+using log4net;
 
 namespace Greenshot.Base.Interop
 {
@@ -30,6 +31,8 @@ namespace Greenshot.Base.Interop
     /// </summary>
     public static class UIAutomationHelper
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(UIAutomationHelper));
+
         /// <summary>
         /// Gets the window title using UI Automation API.
         /// This works across security boundaries where GetWindowText may fail.
@@ -48,9 +51,14 @@ namespace Greenshot.Base.Interop
                 var element = AutomationElement.FromHandle(hWnd);
                 return element?.Current.Name;
             }
-            catch
+            catch (ElementNotAvailableException)
             {
-                // Silently fail - caller should handle null return
+                // Window was closed or became unavailable - this is expected
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Failed to get window title via UI Automation", ex);
                 return null;
             }
         }
