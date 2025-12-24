@@ -419,6 +419,11 @@ namespace Greenshot.Base.Core
                 if (_text == null)
                 {
                     _text = User32Api.GetText(Handle);
+                    // Fallback to UI Automation for Chromium-based browsers where GetWindowText fails
+                    if (string.IsNullOrEmpty(_text))
+                    {
+                        _text = Interop.UIAutomationHelper.GetWindowTitle(Handle);
+                    }
                 }
 
                 return _text;
